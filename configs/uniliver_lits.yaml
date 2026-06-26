@@ -1,0 +1,34 @@
+# UniLiver training config (LiTS single-dataset setting).
+# Hyper-parameters follow paper Sec. 3.1.
+
+model:
+  in_channels: 1
+  feat_channels: 32
+  embed_dim: 64
+  num_classes:
+    V: 1     # vessel (binary)
+    C: 8     # Couinaud segments
+    T: 1     # tumor (binary)
+  vct_steps: 3        # VCT-SD refinement steps S
+  pretrained: vesselfm.pth   # DynUNet backbone init (VesselFM weights)
+
+data:
+  root: data/
+  datasets: [LiTS]    # use [LiTS, MSD8] for the joint "Multi" setting
+  patch_size: [96, 96, 96]
+  split_ratio: 0.8    # 8:2 train/test
+
+train:
+  epochs: 150
+  batch_size: 2
+  optimizer: adamw
+  lr: 2.0e-5
+  lr_step: 5          # step decay
+  lr_decay: 0.2       # x0.2 every lr_step epochs
+
+loss:
+  type: dice_ce
+  target_weights:
+    V: 1.0
+    C: 1.0
+    T: 3.0            # lambda_tumor = 3.0
